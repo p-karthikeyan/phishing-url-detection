@@ -1,34 +1,42 @@
-import joblib
 import numpy as np
+import pandas as pd
 from flask import Flask,render_template,request
+from sklearn.ensemble import RandomForestClassifier
+from url_processing import FeatureExtraction
 
 app = Flask(__name__)
+
 
 @app.route('/',methods=['GET','POST'])
 def validate_url():
     if request.method=="POST":
         Url=request.form.get('url')
 
-        # processing the url (..pending..)
+        obj = FeatureExtraction(Url)
+        Xtest=obj.getFeaturesList()
 
+        X_test = np.array([Xtest])
 
-        result=[1,-1,-1,1,-1,1,-1,1,-1,1,1,1,1,1,0,-1,1,1,1,1,1,1,1,-1,-1,1,-1,1,-1,1]   # expected 1 30Data
-        res=[1,1,1,1,1,-1,0,1,1,1,1,1,-1,0,0,-1,-1,-1,0,1,1,1,1,-1,1,1,1,1,-1,-1]  # expected -1
+        val=rf_classifier.predict(X_test)
+        if val==-1:
+            return f'<h1>{Url} is NOT SAFE to Use!!!</h1>'
 
-        # arr=np.array(result).reshape(1,31)
-
-        
-        loaded_model = joblib.load('rf_model.pkl')
-        val=loaded_model.predict([result])[0]
-
-
-
-        return f'<h1>{val} is Validated! SAFE to Use</h1>'
+        return f'<h1>{Url} is Validated! SAFE to Use</h1>'
     return render_template('index.html')
 
 
 
 
 if __name__ == '__main__':
+
+    # Load the dataset from a CSV file
+    df = pd.read_csv("phishing.csv")
+    X = df.drop(["class","Index"], axis=1) # features
+    y = df["class"]              # target
+
+    # model creation
+    rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf_classifier.fit(X,y)
+
     app.run(debug=True)
 

@@ -489,5 +489,3 @@ class FeatureExtraction:
         return self.features
     
 url="http://8csdg3iejj.lilagoraj.pl/"
-obj = FeatureExtraction(url)
-print(obj.getFeaturesList())
